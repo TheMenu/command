@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-require 'simple_command'
-require 'simple_command/error_handling'
+require 'command/simple_command'
+require 'command/error_handling'
 
 module Command
   class CommandError < RuntimeError
@@ -15,8 +15,8 @@ module Command
   class ExitError < CommandError; end
 
   def self.prepended(base)
-    base.prepend SimpleCommand
-    base.include SimpleCommand::ErrorHandling
+    base.prepend Command::SimpleCommand
+    base.include Command::ErrorHandling
   end
 
   def call

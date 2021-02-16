@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe SimpleCommand do
+describe Command::SimpleCommand do
   let(:command) { SuccessCommand.new(2) }
 
   describe '.call' do
@@ -30,7 +30,7 @@ describe SimpleCommand do
     it 'raises an exception if the method is not defined in the command' do
       expect do
         missed_call_command.call
-      end.to raise_error(SimpleCommand::NotImplementedError)
+      end.to raise_error(Command::NotImplementedError)
     end
   end
 
@@ -81,8 +81,8 @@ describe SimpleCommand do
   end
 
   describe '#errors' do
-    it 'returns an SimpleCommand::Errors' do
-      expect(command.errors).to be_a(SimpleCommand::Errors)
+    it 'returns a Command::Errors' do
+      expect(command.errors).to be_a(Command::Errors)
     end
 
     context 'with no errors' do

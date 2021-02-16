@@ -1,3 +1,3 @@
-module SimpleCommand
+module Command
   VERSION = '0.0.9'
 end

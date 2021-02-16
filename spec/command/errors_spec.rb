@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-describe SimpleCommand::Errors do
-  let(:errors) { SimpleCommand::Errors.new }
+describe Command::Errors do
+  let(:errors) { Command::Errors.new }
 
   describe '#add' do
     before do

@@ -1,6 +1,6 @@
-require 'simple_command/i18n'
+require 'command/i18n'
 
-module SimpleCommand
+module Command
   class NotImplementedError < ::StandardError; end
 
   class Errors < Hash

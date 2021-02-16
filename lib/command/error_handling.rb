@@ -1,4 +1,4 @@
-module SimpleCommand
+module Command
   module ErrorHandling
     def self.prepended(base)
       def base.i18n_scope
