@@ -93,11 +93,11 @@ describe SimpleCommand do
 
     context 'with errors' do
       before do
-        command.errors.add(:some_error, 'some message')
+        command.errors.add(:attribute, :some_error, 'some message')
       end
 
       it 'has a key with error message' do
-        expect(command.errors[:some_error]).to eq(['some message'])
+        expect(command.errors[:attribute]).to eq([{ code: :some_error, message: 'some message' }])
       end
     end
   end

@@ -5,24 +5,24 @@ describe SimpleCommand::Errors do
 
   describe '#add' do
     before do
-      errors.add :some_error, 'some error description'
+      errors.add :attribute, :some_error, 'some error description'
     end
 
     it 'adds the error' do
-      expect(errors[:some_error]).to eq(['some error description'])
+      expect(errors[:attribute]).to eq([{ code: :some_error, message: 'some error description' }])
     end
 
     it 'adds the same error only once' do
-      errors.add :some_error, 'some error description'
-      expect(errors[:some_error]).to eq(['some error description'])
+      errors.add :attribute, :some_error, 'some error description'
+      expect(errors[:attribute]).to eq([{ code: :some_error, message: 'some error description' }])
     end
   end
 
   describe '#add_multiple_errors' do
     let(:errors_list) do
       {
-        some_error: ['some error description'],
-        another_error: ['another error description']
+        attribute_a: [{ code: :some_error, message: 'some error description' }],
+        attribute_b: [{ code: :another_error, message: 'another error description' }],
       }
     end
 
@@ -31,8 +31,8 @@ describe SimpleCommand::Errors do
     end
 
     it 'populates itself with the added errors' do
-      expect(errors[:some_error]).to eq(errors_list[:some_error])
-      expect(errors[:another_error]).to eq(errors_list[:another_error])
+      expect(errors[:attribute_a]).to eq(errors_list[:attribute_a])
+      expect(errors[:attribute_b]).to eq(errors_list[:attribute_b])
     end
   end
 end
