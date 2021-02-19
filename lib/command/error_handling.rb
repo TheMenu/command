@@ -13,7 +13,14 @@ module Command
     end
 
     def self.included(base)
-      base.cattr_accessor :i18n_scope
+      def base.i18n_scope
+        @i18n_scope ||= "errors.messages" # Setting default
+      end
+
+      def base.i18n_scope=(new)
+        @i18n_scope = new
+      end
+
       base.i18n_scope = "errors.messages" # Setting default
     end
 

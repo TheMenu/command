@@ -1,49 +1,89 @@
+# frozen_string_literal: true
+
 # TODO: Rewrite this as a pure module definition to remove dependency on RSpec
 require 'rspec/matchers'
 
-# expect(command).to be_unsuccessful
-# expect(command).to be_unsuccessful.with(hash_of_errors)
-RSpec::Matchers.define :be_unsuccessful do |options|
-  chain :with, :expected_errors
+=begin
+it { expect(Extinguishers::PayloadValidator).to have_been_called_with_acp(payload) }
+it { is_expected.to be_failure }
+it { is_expected.to have_failed }
+it { is_expected.to have_failed.with_error(:date, :invalid) }
+it { is_expected.to have_failed.with_error(:date, :invalid, "The format must be iso8601") }
+it { is_expected.to have_error(:date, :invalid) }
+it { is_expected.to have_error(:date, :invalid, "The format must be iso8601") }
+=end
+module Command
+  module SpecHelpers
+    module CommandMatchers
+      extend RSpec::Matchers::DSL
 
-  match do |command|
-    if expected_errors.nil?
-      command.failure?
-    else
-      command.failure? && (command.errors == expected_errors)
-    end
-  end
+      matcher :have_been_called_with_action_controller_parameters do
+        match(notify_expectation_failures: true) do |command_class|
+          expect(command_class).to have_received(:call).
+            with(an_instance_of(ActionController::Parameters)) do |params|
+              expect(params.to_unsafe_h).to match(payload)
+            end
+        end
+      end
+      alias_matcher :have_been_called_with_ac_parameters , :have_been_called_with_action_controller_parameters
+      alias_matcher :have_been_called_with_acp , :have_been_called_with_action_controller_parameters
 
-  failure_message do |command|
-    if command.failure?
-      "expected that #{command} errors should be #{expected_errors} but errors are #{command.errors} "
-    else
-      "expected that #{command} should not be successful"
-    end
-  end
-end
+      matcher :have_failed do
+        match(notify_expectation_failures: true) do |command|
+          expect(command).to have_error(@key, @code, @message) if @key.presence
+          command.failure?
+        rescue RSpec::Expectations::ExpectationNotMetError => e
+          @matcher_error_message = e.message
+          false
+        end
 
-# expect(command).to be_successful
-# expect(command).to be_successful.with("command_result")
-RSpec::Matchers.define :be_successful do |options|
-  chain :with, :expected_result
+        chain :with_error do |key, code, message = nil|
+          @key = key
+          @code = code
+          @message = message
+        end
 
-  success = nil
+        failure_message do
+          @matcher_error_message
+        end
+      end
 
-  match do |command|
-    success = command.respond_to?(:successful?) ? command.successful? : command.success? # to be compatible with Rails 6 which add a helper with identical name
-    if expected_result.nil?
-      success
-    else
-      success && command.result == expected_result
-    end
-  end
+      matcher :have_error do
+        match do |command|
+          if message.presence
+            command.errors[key]&.include?(code: code, message: message)
+          else
+            command.has_error?(key, code)
+          end
+        end
 
-  failure_message do |command|
-    if success
-      "expected that #{command} result should be #{expected_result} but is #{command.result}"
-    else
-      "expected that #{command} should be successful"
+        failure_message do
+          err = "expected #{command_name} to have errors on #{to_txt key} with code #{to_txt code}"
+          err += " and message #{to_txt message}" if message.present?
+          err += "\nactual error for #{to_txt key}: #{@actual.errors[key] || 'nil'}"
+          err
+        end
+
+        def command_name
+          actual.class.name
+        end
+
+        def key
+          expected.first
+        end
+
+        def code
+          expected.second
+        end
+
+        def message
+          expected.third
+        end
+
+        def to_txt(value)
+          value.is_a?(Symbol) ? ":#{value}" : "\"#{value}\""
+        end
+      end
     end
   end
 end

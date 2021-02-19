@@ -10,7 +10,7 @@ module Command
 =begin
     Example :
       mock_unsuccessful_command(ExtinguishDebtAndLetterIt, errors: {
-        entry: [not_found: "Couldn't find Entry with 'document_identifier'='foo'"]
+        entry: { not_found: "Couldn't find Entry with 'document_identifier'='foo'" }
       })
 
     is equivalent to
@@ -24,7 +24,7 @@ module Command
         mock_command(command, success: false, errors: errors, params: params)
       end
 
-      def mock_command(command, success:, result: nil, errors: [], params: any_args)
+      def mock_command(command, success:, result: nil, errors: {}, params: any_args)
         if Object.const_defined?('FakeCommandErrors')
           klass = Object.const_get('FakeCommandErrors')
         else
