@@ -5,14 +5,15 @@ module Command
 
   class Errors < Hash
     def add(attribute, code, message_or_key = code, **options)
-      if defined?(I18n) && I18n.exists?(message_or_key)
-        message = I18n.t(message_or_key,
-          **options,
-          default: message_or_key,
-        )
-      else
-        message = message_or_key
+      if defined?(I18n)
+        # Can't use `I18n.exists?` because it doesn't accept a scope: kwarg
+        message = begin
+          I18n.t!(message_or_key, **options)
+        rescue I18n::MissingTranslationData
+          nil
+        end
       end
+      message ||= message_or_key
 
       self[attribute] ||= []
       self[attribute] << { code: code, message: message }
