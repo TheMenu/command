@@ -1,5 +1,5 @@
 class MissedCallCommand
-  prepend SimpleCommand
+  prepend Command::SimpleCommand
 
   def initialize(input)
     @input = input
