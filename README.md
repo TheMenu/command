@@ -2,13 +2,36 @@
 
 A simple, standardized way to build and use _Service Objects_ in Ruby.  
 
-## Requirements
+Table of Contents
+=================
+
+* [Command](#command)
+* [Table of Contents](#table-of-contents)
+* [Requirements](#requirements)
+* [Installation](#installation)
+* [Usage](#usage)
+    * [Subcommand](#subcommand)
+    * [Merge errors from ActiveRecord instance](#merge-errors-from-activerecord-instance)
+    * [Error message](#error-message)
+* [Test with Rspec](#test-with-rspec)
+    * [Mock](#mock)
+        * [Setup](#setup)
+        * [Usage](#usage-1)
+    * [Matchers](#matchers)
+        * [Setup](#setup-1)
+        * [Rails project](#rails-project)
+        * [Usage](#usage-2)
+
+
+Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
+
+# Requirements
 
 * At least Ruby 2.0+
 
 It is used with Ruby 2.7 and Ruby 3 projects.
 
-## Installation
+# Installation
 
 Add this line to your application's Gemfile:
 
@@ -24,7 +47,7 @@ Or install it yourself as:
 
     $ gem install command
 
-## Usage
+# Usage
 
 Here's a basic example of a command that check if a collection is empty or not 
 
@@ -50,18 +73,6 @@ class CollectionChecker
   end
 end
 ```
-
-in your locale file
-```yaml
-# config/locales/en.yml
-en:
-  activemodel:
-    errors:
-      models:
-        authenticate_user:
-          failure: Wrong email or password
-```
-
 Then, in your controller:
 
 ```ruby
@@ -116,7 +127,7 @@ When errors, the controller will return the following json :
 }
 ```
 
-###  Subcommand
+##  Subcommand
 
 It is also possible to call sub command and stop run if failed :
 ```ruby
@@ -174,7 +185,7 @@ class Multiply
 end
 ```
 
-### Merge errors from ActiveRecord instance
+## Merge errors from ActiveRecord instance
 ```ruby
 class UserCreator
   prepend Command
@@ -193,7 +204,7 @@ command.failure? # => true
 command.errors # => { name: [ { code: :required, message: "must exist" } ] }
 ```
 
-### Error message
+## Error message
 
 The third parameter is the message.
 ```ruby
@@ -223,7 +234,7 @@ errors.add(:item, :invalid, :invalid)
 ```
 
 
-## Test with Rspec
+# Test with Rspec
 Make the spec file `spec/commands/collection_checker_spec.rb` like:
 
 ```ruby
@@ -336,6 +347,8 @@ end
 To simplify your life, the gem come with matchers.  
 You must include `Command::SpecHelpers::CommandMatchers`in your code.
 
+### Setup
+
 To allow this, you must require the `spec_helpers` file and include them into your specs files :
 ```ruby
 require 'command/spec_helpers'
@@ -353,7 +366,7 @@ RSpec.configure do |config|
 end
 ```
 
-#### Rails project
+### Rails project
 
 Instead of above, you can include matchers only for specific classes, using inference 
 
