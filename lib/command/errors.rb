@@ -8,7 +8,7 @@ module Command
       if defined?(I18n)
         # Can't use `I18n.exists?` because it doesn't accept a scope: kwarg
         message = begin
-          I18n.t!(message_or_key, **options)
+          I18n.t!(message_or_key, scope: self.class.i18n_scope, **options)
         rescue I18n::MissingTranslationData
           nil
         end

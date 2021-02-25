@@ -24,13 +24,8 @@ module Command
       base.i18n_scope = "errors.messages" # Setting default
     end
 
-    def add_error(attribute, code, message_or_key, **i18n_options)
-      message = I18n.t(message_or_key,
-        scope: self.class.i18n_scope,
-        **i18n_options,
-        default: message_or_key,
-      )
-      errors.add(attribute, code, message, **i18n_options)
+    def add_error(*args)
+      errors.add(*args)
     end
 
     def has_error?(attribute, code)
