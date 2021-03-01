@@ -37,6 +37,29 @@ describe Command::Errors do
     end
   end
 
+  describe '#merge_from' do
+    it 'can import errors from object with similar error sets' do
+      commandlike_object = OpenStruct.new(errors: described_class.new)
+      commandlike_object.errors.add(:name, :bad_name, "Bad name!")
+
+      errors.merge_from(commandlike_object)
+
+      expect(errors).to have_key(:name)
+      expect(errors[:name]).to include(code: :bad_name, message: "Bad name!")
+    end
+
+    it 'can import errors from any object responding to errors.details and errors.messages' do
+      recordlike_object = OpenStruct.new(errors: OpenStruct.new(messages: {}, details: {}))
+      recordlike_object.errors.messages[:name] = ["Bad name!"]
+      recordlike_object.errors.details[:name] = [{error: :bad_name}]
+
+      errors.merge_from(recordlike_object)
+
+      expect(errors).to have_key(:name)
+      expect(errors[:name]).to include(code: :bad_name, message: "Bad name!")
+    end
+  end
+
   describe '#add_multiple_errors' do
     let(:errors_list) do
       {

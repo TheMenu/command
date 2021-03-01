@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe 'Command::SimpleCommand' do
+describe Command do
   let(:command) { SuccessCommand.new(2) }
 
   describe '.call' do
