@@ -27,6 +27,21 @@ module Command
       self[attribute].uniq!
     end
 
+    def merge_from(object)
+      raise ArgumentError unless object.respond_to?(:errors)
+      errors = if object.errors.respond_to?(:messages)
+        object.errors.messages.each_with_object({}) do |(attribute, messages), object_errors|
+          object_errors[attribute] = messages.
+            zip(object.errors.details[attribute]).
+            map { |message, detail| [detail[:error], message] }
+        end
+      else
+        object.errors
+      end
+
+      add_multiple_errors(errors)
+    end
+
     def add_multiple_errors(errors_hash)
       errors_hash.each do |key, values|
         values.each do |value|

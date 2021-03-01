@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Command::ErrorHandling do
+describe 'Command::ErrorHandling' do
   before do
     instance
 
@@ -9,8 +9,7 @@ describe Command::ErrorHandling do
 
   let(:klass) do
     prepend_in = Class.new
-    prepend_in.prepend(Command) # To provide contract ErrorHandling relies on
-    prepend_in.prepend(described_class)
+    prepend_in.prepend(Command)
   end
 
   let(:instance) do
@@ -32,7 +31,7 @@ describe Command::ErrorHandling do
     recordlike_object.errors.messages[:name] = ["Bad name!"]
     recordlike_object.errors.details[:name] = [{error: :bad_name}]
 
-    instance.merge_errors_from_record(recordlike_object)
+    instance.merge_errors_from(recordlike_object)
 
     expect(instance.errors).to have_key(:name)
     expect(instance.errors[:name]).to include(code: :bad_name, message: "Bad name!")
