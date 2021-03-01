@@ -1,5 +1,5 @@
 class SuccessCommand
-  prepend Command::SimpleCommand
+  prepend Command
 
   def initialize(input)
     @input = input

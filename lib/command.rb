@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-require 'command/simple_command'
 require 'command/error_handling'
+require 'command/version'
+require 'command/errors'
 
 module Command
   class CommandError < RuntimeError
@@ -11,20 +12,40 @@ module Command
       super(message)
     end
   end
-
   class ExitError < CommandError; end
 
   def self.prepended(base)
-    base.prepend Command::SimpleCommand
+    base.extend ClassMethods
     base.include Command::ErrorHandling
+  end
+
+  attr_reader :result
+
+  module ClassMethods
+    def call(*args)
+      new(*args).call
+    end
   end
 
   def call
     fail NotImplementedError unless defined?(super)
 
+    @called = true
     @result = super
-    @result
+    self
   rescue ExitError => e
+  end
+
+  def success?
+    called? && !failure?
+  end
+
+  def failure?
+    called? && errors.any?
+  end
+
+  def errors
+    @errors ||= Command::Errors.new
   end
 
   def assert_sub(klass, *args)
@@ -38,5 +59,11 @@ module Command
   def as_sub_command
     @as_sub_command = true
     self
+  end
+
+  private
+
+  def called?
+    @called ||= false
   end
 end

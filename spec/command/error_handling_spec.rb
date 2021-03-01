@@ -9,7 +9,7 @@ describe Command::ErrorHandling do
 
   let(:klass) do
     prepend_in = Class.new
-    prepend_in.prepend(Command::SimpleCommand) # To provide contract ErrorHandling relies on
+    prepend_in.prepend(Command) # To provide contract ErrorHandling relies on
     prepend_in.prepend(described_class)
   end
 
