@@ -4,11 +4,18 @@ module Command
   class NotImplementedError < ::StandardError; end
 
   class Errors < Hash
+    attr_reader :source
+
+    def initialize(source: nil)
+      @source = source
+      super()
+    end
+
     def add(attribute, code, message_or_key = code, **options)
       if defined?(I18n)
         # Can't use `I18n.exists?` because it doesn't accept a scope: kwarg
         message = begin
-          I18n.t!(message_or_key, scope: self.class.i18n_scope, **options)
+          I18n.t!(message_or_key, scope: source&.i18n_scope, **options)
         rescue I18n::MissingTranslationData
           nil
         end

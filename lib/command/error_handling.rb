@@ -24,6 +24,10 @@ module Command
       base.i18n_scope = "errors.messages" # Setting default
     end
 
+    def errors
+      @errors ||= Command::Errors.new(source: self.class)
+    end
+
     def add_error(*args)
       errors.add(*args)
     end
