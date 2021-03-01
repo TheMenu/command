@@ -52,6 +52,7 @@ module Command
   end
   alias_method :full_errors, :errors
 
+  # Convenience/retrocompatibility aliases
   def self.errors_alias(method, errors_method)
     define_method method do |*args|
       errors.send errors_method, *args
