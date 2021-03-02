@@ -50,7 +50,6 @@ module Command
   def errors
     @errors ||= Command::Errors.new(source: self.class)
   end
-  alias_method :full_errors, :errors
 
   module LegacyErrorHandling
     # Convenience/retrocompatibility aliases
@@ -64,6 +63,7 @@ module Command
     errors_legacy_alias :add_error, :add
     errors_legacy_alias :merge_errors_from, :merge_from
     errors_legacy_alias :has_error?, :exists?
+    errors_legacy_alias :full_errors, :itself
   end
   include LegacyErrorHandling
 
