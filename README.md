@@ -274,7 +274,7 @@ class CommandWithCustomScope
   self.i18n_scope = 'activerecord.messages'
 
   def call
-    errors.add(:base, :invalid) # Identical to errors.add(:generic_attribute, :invalid, :invalid)
+    errors.add(:base, :invalid) # Identical to errors.add(:base_attribute, :invalid, :invalid)
   end
 end
 CommandWithCustomScope.call.errors == {
