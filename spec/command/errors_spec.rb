@@ -37,6 +37,14 @@ describe Command::Errors do
     end
   end
 
+  describe '#exists?' do
+    it "indicates if the attribute has a specific error", :aggregate_failures do
+      expect(errors.exists?(:attribute, :some_error)).to eq(false)
+      errors.add(:attribute, :some_error, 'some message')
+      expect(errors.exists?(:attribute, :some_error)).to eq(true)
+    end
+  end
+
   describe '#merge_from' do
     it 'can import errors from object with similar error sets' do
       commandlike_object = OpenStruct.new(errors: described_class.new)

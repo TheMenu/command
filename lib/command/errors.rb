@@ -11,6 +11,10 @@ module Command
       super()
     end
 
+    def exists?(attribute, code)
+      self.fetch(attribute, []).any? { |e| e[:code] == code }
+    end
+
     def add(attribute, code, message_or_key = code, **options)
       if defined?(I18n)
         # Can't use `I18n.exists?` because it doesn't accept a scope: kwarg

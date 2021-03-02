@@ -52,19 +52,20 @@ module Command
   end
   alias_method :full_errors, :errors
 
-  # Convenience/retrocompatibility aliases
-  def self.errors_alias(method, errors_method)
-    define_method method do |*args|
-      errors.send errors_method, *args
+  module LegacyErrorHandling
+    # Convenience/retrocompatibility aliases
+    def self.errors_legacy_alias(method, errors_method)
+      define_method method do |*args|
+        puts "/!\\ #{method} is deprecated, please use errors.#{errors_method} instead."
+        errors.send errors_method, *args
+      end
     end
+    errors_legacy_alias :clear_errors, :clear
+    errors_legacy_alias :add_error, :add
+    errors_legacy_alias :merge_errors_from, :merge_from
+    errors_legacy_alias :has_error?, :exists?
   end
-  errors_alias :clear_errors, :clear
-  errors_alias :add_error, :add
-  errors_alias :merge_errors_from, :merge_from
-
-  def has_error?(attribute, code)
-    errors.fetch(attribute, []).any? { |e| e[:code] == code }
-  end
+  include LegacyErrorHandling
 
   def assert_sub(klass, *args)
     command = klass.new(*args).as_sub_command.call
