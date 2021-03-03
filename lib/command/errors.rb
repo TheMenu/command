@@ -14,6 +14,7 @@ module Command
     def exists?(attribute, code)
       self.fetch(attribute, []).any? { |e| e[:code] == code }
     end
+    alias_method :has_error?, :exists?
 
     def add(attribute, code, message_or_key = code, **options)
       if defined?(I18n)
