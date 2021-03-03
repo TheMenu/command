@@ -55,7 +55,7 @@ module Command
     # Convenience/retrocompatibility aliases
     def self.errors_legacy_alias(method, errors_method)
       define_method method do |*args|
-        puts "/!\\ #{method} is deprecated, please use errors.#{errors_method} instead."
+        warn "/!\\ #{method} is deprecated, please use errors.#{errors_method} instead."
         errors.send errors_method, *args
       end
     end
