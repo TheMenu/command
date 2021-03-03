@@ -4,17 +4,67 @@ describe Command::Errors do
   let(:errors) { Command::Errors.new }
 
   describe '#add' do
-    before do
-      errors.add :attribute, :some_error, 'some error description'
-    end
-
     it 'adds the error' do
+      errors.add :attribute, :some_error, 'some error description'
       expect(errors[:attribute]).to eq([{ code: :some_error, message: 'some error description' }])
     end
 
     it 'adds the same error only once' do
       errors.add :attribute, :some_error, 'some error description'
       expect(errors[:attribute]).to eq([{ code: :some_error, message: 'some error description' }])
+    end
+
+    it 'tries to localize the error message if possible' do
+      expect(I18n).to receive(:t!).with(:bad_post_code, anything).and_return("Very bad post code")
+
+      errors.add :address, :invalid, :bad_post_code
+      expect(errors[:address]).to eq([{ code: :invalid, message: "Very bad post code" }])
+    end
+
+    context 'when the errors are for a i18n-scoped class' do
+      let(:scoped_klass) { double('Command', i18n_scope: 'my.custom.scope') }
+      let(:errors) { Command::Errors.new(source: scoped_klass) }
+
+      it "takes the scope into account for localization" do
+        allow(I18n).to receive(:t!).with(:bad_post_code, anything).
+          and_return("Bad error message")
+        expect(I18n).to receive(:t!).with(:bad_post_code, hash_including(scope: 'my.custom.scope')).
+          and_return("Correct error message")
+
+        errors.add :address, :invalid, :bad_post_code
+        expect(errors[:address]).to eq([{ code: :invalid, message: "Correct error message" }])
+      end
+    end
+  end
+
+  describe '#exists?' do
+    it "indicates if the attribute has a specific error", :aggregate_failures do
+      expect(errors.exists?(:attribute, :some_error)).to eq(false)
+      errors.add(:attribute, :some_error, 'some message')
+      expect(errors.exists?(:attribute, :some_error)).to eq(true)
+    end
+  end
+
+  describe '#merge_from' do
+    it 'can import errors from object with similar error sets' do
+      commandlike_object = OpenStruct.new(errors: described_class.new)
+      commandlike_object.errors.add(:name, :bad_name, "Bad name!")
+
+      errors.merge_from(commandlike_object)
+
+      expect(errors).to have_key(:name)
+      expect(errors[:name]).to include(code: :bad_name, message: "Bad name!")
+    end
+
+    it 'can import errors from any object responding to errors.details and errors.messages' do
+      recordlike_object = OpenStruct.new(errors: OpenStruct.new(messages: {}, details: {}))
+      recordlike_object.errors.messages[:name] = ["Bad name!"]
+      recordlike_object.errors.details[:name] = [{error: :bad_name}]
+
+      errors.merge_from(recordlike_object)
+
+      expect(errors).to have_key(:name)
+      expect(errors[:name]).to include(code: :bad_name, message: "Bad name!")
     end
   end
 
