@@ -20,8 +20,8 @@ module Command
   attr_reader :result
 
   module ClassMethods
-    def call(*args)
-      new(*args).call
+    def call(*args, **kwargs)
+      new(*args, **kwargs).call
     end
 
     def extended(base)
