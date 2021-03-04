@@ -204,6 +204,62 @@ command.failure? # => true
 command.errors # => { name: [ { code: :required, message: "must exist" } ] }
 ```
 
+## Stopping execution of the command
+
+To avoid the verbosity of numerous `return` statements, you have three alternative ways to stop the execution of a
+command:
+
+### abort
+```ruby
+class FormatChecker
+  prepend Command
+
+  def call
+    abort :collection, :failure, "Not an array" unless @collection.is_a?(Array)
+    @collection.class.name
+  end
+
+  def initialize(collection)
+    @collection = collection
+  end
+end
+
+command = FormatChecker.call("not array")
+command.success? # => false
+command.failure? # => true
+command.errors # => { collection: [ { code: :failure, message: "Not an array" } ] }
+```
+
+### assert
+```ruby
+class UserDestroyer
+  prepend Command
+
+  def call
+    assert check_if_user_is_destroyable
+    @user.destroy!
+  end
+
+  def check_if_user_is_destroyable
+    errors.add :user, :active, "Can't destroy active users" if @user.projects.active.any?
+    errors.add :user, :sole_admin, "Can't destroy last admin" if @user.admin? && User.admin.count == 1
+  end
+end
+
+invalid_user = User.admin.with_active_projects.first
+command = UserDestroyer.call(invalid_user)
+command.success? # => false
+command.failure? # => true
+command.errors # => { user: [
+#   { code: :active, message: "Can't destroy active users" },
+#   { code: :sole_admin, message: "Can't destroy last admin" }
+# ] }
+```
+
+### ExitError
+
+Raising an `ExitError` anywhere during `#call`'s execution will stop the command.
+
 ## Error message
 
 The third parameter is the message.

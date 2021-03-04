@@ -37,6 +37,16 @@ module Command
     @result = super
     self
   rescue ExitError => _e
+    self
+  end
+
+  def abort(*args, **kwargs)
+    errors.add(*args, **kwargs)
+    raise ExitError
+  end
+
+  def assert(*_args)
+    raise ExitError if errors.any?
   end
 
   def success?
