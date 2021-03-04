@@ -34,6 +34,61 @@ describe Command do
     end
   end
 
+  describe '#abort' do
+    let(:aborting_command) {
+      Class.new do
+        prepend Command
+
+        def call
+          abort :base, :some_error, 'Error message'
+          raise "We shouldn't reach this"
+        end
+      end
+    }
+
+    it "should stop the execution as soon as it's called" do
+      expect { aborting_command.call }.not_to raise_error
+    end
+
+    it "should add the error passed as args" do
+      expect(aborting_command.call.errors).to have_error(:base, :some_error)
+    end
+  end
+
+  describe '#assert' do
+    let(:asserting_command) {
+      Class.new do
+        prepend Command
+
+        def initialize(should_error)
+          @should_error = should_error
+        end
+
+        def call
+          assert potential_error
+          raise "We shouldn't reach this"
+        end
+
+        def potential_error
+          if @should_error
+            errors.add :base, :error1
+            errors.add :base, :error2
+          end
+        end
+      end
+    }
+
+    it "should stop the execution as soon as it's called" do
+      expect { asserting_command.call }.not_to raise_error
+    end
+
+    it "should add the error passed as args" do
+      expect(asserting_command.call.errors).
+        to have_error(:base, :error1).
+        and have_error(:base, :error2)
+    end
+  end
+
   describe "#success?" do
     it "is true by default" do
       expect(command.call.success?).to be_truthy
