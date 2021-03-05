@@ -64,9 +64,9 @@ module Command
   module LegacyErrorHandling
     # Convenience/retrocompatibility aliases
     def self.errors_legacy_alias(method, errors_method)
-      define_method method do |*args|
+      define_method method do |*args, **kwargs|
         warn "/!\\ #{method} is deprecated, please use errors.#{errors_method} instead."
-        errors.send errors_method, *args
+        errors.send errors_method, *args, **kwargs
       end
     end
     errors_legacy_alias :clear_errors, :clear
@@ -77,8 +77,8 @@ module Command
   end
   include LegacyErrorHandling
 
-  def assert_sub(klass, *args)
-    command = klass.new(*args).as_sub_command.call
+  def assert_sub(klass, *args, **kwargs)
+    command = klass.new(*args, **kwargs).as_sub_command.call
     (@sub_commands ||= []) << command
     return command.result if command.success?
     errors.merge_from(command)
