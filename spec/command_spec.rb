@@ -79,11 +79,11 @@ describe Command do
     }
 
     it "should stop the execution as soon as it's called" do
-      expect { asserting_command.call }.not_to raise_error
+      expect { asserting_command.call(true) }.not_to raise_error
     end
 
     it "should add the error passed as args" do
-      expect(asserting_command.call.errors).
+      expect(asserting_command.call(true).errors).
         to have_error(:base, :error1).
         and have_error(:base, :error2)
     end

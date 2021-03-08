@@ -1,5 +1,13 @@
 # frozen_string_literal: true
 
+if RUBY_VERSION >= "3"
+  require "command/ruby-3-specific.rb"
+elsif RUBY_VERSION.start_with? "2.7"
+  require "command/ruby-2-7-specific.rb"
+else
+  require "command/ruby-2-specific.rb"
+end
+
 require 'command/version'
 require 'command/errors'
 
@@ -20,9 +28,6 @@ module Command
   attr_reader :result
 
   module ClassMethods
-    def call(*args, **kwargs)
-      new(*args, **kwargs).call
-    end
 
     def extended(base)
       base.i18n_scope = "errors.messages"
@@ -38,11 +43,6 @@ module Command
     self
   rescue ExitError => _e
     self
-  end
-
-  def abort(*args, **kwargs)
-    errors.add(*args, **kwargs)
-    raise ExitError
   end
 
   def assert(*_args)
@@ -62,13 +62,6 @@ module Command
   end
 
   module LegacyErrorHandling
-    # Convenience/retrocompatibility aliases
-    def self.errors_legacy_alias(method, errors_method)
-      define_method method do |*args, **kwargs|
-        warn "/!\\ #{method} is deprecated, please use errors.#{errors_method} instead."
-        errors.send errors_method, *args, **kwargs
-      end
-    end
     errors_legacy_alias :clear_errors, :clear
     errors_legacy_alias :add_error, :add
     errors_legacy_alias :merge_errors_from, :merge_from
@@ -76,14 +69,6 @@ module Command
     errors_legacy_alias :full_errors, :itself
   end
   include LegacyErrorHandling
-
-  def assert_sub(klass, *args, **kwargs)
-    command = klass.new(*args, **kwargs).as_sub_command.call
-    (@sub_commands ||= []) << command
-    return command.result if command.success?
-    errors.merge_from(command)
-    raise ExitError
-  end
 
   def as_sub_command
     @as_sub_command = true
