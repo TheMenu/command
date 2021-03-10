@@ -28,8 +28,7 @@ module Command
   attr_reader :result
 
   module ClassMethods
-
-    def extended(base)
+    def self.extended(base)
       base.i18n_scope = "errors.messages"
     end
     attr_accessor :i18n_scope
