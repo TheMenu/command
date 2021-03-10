@@ -165,6 +165,22 @@ describe Command do
     end
   end
 
+  describe ".i18n_scope" do
+    after do
+      # Resetting to prevent leaks across specs
+      command.class.i18n_scope = 'errors.messages'
+    end
+
+    it "has a default value of 'errors.messages'" do
+      expect(command.class.i18n_scope).to eq('errors.messages')
+    end
+
+    it "can be overriden" do
+      command.class.i18n_scope = 'errors.new_scope'
+      expect(command.class.i18n_scope).to eq('errors.new_scope')
+    end
+  end
+
   describe "Subcommmand mechanism" do
     pending 'TODO'
   end
