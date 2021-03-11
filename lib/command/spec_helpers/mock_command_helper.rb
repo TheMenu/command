@@ -54,12 +54,24 @@ module Command
           allow(command).to receive(:call).and_return(double)
           allow(command).to receive(:new).and_return(double)
         else
-          mock_params = Array.wrap(params)
-          hash_params = mock_params.extract_options!
+          mock_params, hash_params = extract_mock_params(params)
           allow(command).to receive(:call).with(*mock_params, **hash_params).and_return(double)
           allow(command).to receive(:new).with(*mock_params, **hash_params).and_return(double)
         end
         double
+      end
+
+      def extract_mock_params(params)
+        if params.is_a? Array
+          kw_params = if params.last.is_a? Hash
+            params.pop
+          else
+            {}
+          end
+          [params, kw_params]
+        else
+          [[params], {}]
+        end
       end
     end
   end
