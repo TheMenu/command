@@ -88,7 +88,7 @@ class CollectionController < ApplicationController
     else
       render_error(
         message: "Payload is empty.",
-        details: command.full_errors,
+        details: command.errors,
       )
     end
   end

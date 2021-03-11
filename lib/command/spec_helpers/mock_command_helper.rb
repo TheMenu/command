@@ -48,7 +48,7 @@ module Command
         allow(double).to receive(:failure?).and_return(!success)
         allow(double).to receive(:result).and_return(result)
         allow(double).to receive(:errors).and_return(fake_command.errors)
-        allow(double).to receive(:full_errors).and_return(fake_command.full_errors)
+        allow(double).to receive(:full_errors).and_return(fake_command.errors)
         allow(double).to receive(:has_error?) { |attribute, code| fake_command.errors.exists? attribute, code }
         if params == NO_PARAMS_PASSED
           allow(command).to receive(:call).and_return(double)
