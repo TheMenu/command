@@ -3,7 +3,9 @@
 module Command
   module SpecHelpers
     module MockCommandHelper
-      def mock_successful_command(command, result:, params: any_args)
+      NO_PARAMS_PASSED = Object.new
+
+      def mock_successful_command(command, result:, params: NO_PARAMS_PASSED)
         mock_command(command, success: true, result: result, params: params)
       end
 
@@ -20,11 +22,11 @@ module Command
         errors: {:entry=>[code: :not_found, message: "Couldn't find Entry with 'document_identifier'='foo'"]},
       )
 =end
-      def mock_unsuccessful_command(command, errors:, params: any_args)
+      def mock_unsuccessful_command(command, errors:, params: NO_PARAMS_PASSED)
         mock_command(command, success: false, errors: errors, params: params)
       end
 
-      def mock_command(command, success:, result: nil, errors: {}, params: any_args)
+      def mock_command(command, success:, result: nil, errors: {}, params: NO_PARAMS_PASSED)
         if Object.const_defined?('FakeCommandErrors')
           klass = Object.const_get('FakeCommandErrors')
         else
@@ -35,24 +37,41 @@ module Command
         if errors.any?
           errors.each do |attr, details|
             details.each do |code, message|
-              fake_command.add_error(attr, code, message)
+              fake_command.errors.add(attr, code, message)
             end
           end
         end
         double = instance_double(command)
-        params = Array.wrap(params)
-        kw_params = params.extract_options!
         allow(double).to receive(:as_sub_command).and_return(double)
         allow(double).to receive(:call).and_return(double)
         allow(double).to receive(:success?).and_return(success)
         allow(double).to receive(:failure?).and_return(!success)
         allow(double).to receive(:result).and_return(result)
         allow(double).to receive(:errors).and_return(fake_command.errors)
-        allow(double).to receive(:full_errors).and_return(fake_command.full_errors)
-        allow(double).to receive(:has_error?) { |attribute, code| fake_command.has_error? attribute, code }
-        allow(command).to receive(:call).with(*params, **kw_params).and_return(double)
-        allow(command).to receive(:new).with(*params, **kw_params).and_return(double)
+        allow(double).to receive(:full_errors).and_return(fake_command.errors)
+        allow(double).to receive(:has_error?) { |attribute, code| fake_command.errors.exists? attribute, code }
+        if params == NO_PARAMS_PASSED
+          allow(command).to receive(:call).and_return(double)
+          allow(command).to receive(:new).and_return(double)
+        else
+          mock_params, hash_params = extract_mock_params(params)
+          allow(command).to receive(:call).with(*mock_params, **hash_params).and_return(double)
+          allow(command).to receive(:new).with(*mock_params, **hash_params).and_return(double)
+        end
         double
+      end
+
+      def extract_mock_params(params)
+        if params.is_a? Array
+          kw_params = if params.last.is_a? Hash
+            params.pop
+          else
+            {}
+          end
+          [params, kw_params]
+        else
+          [[params], {}]
+        end
       end
     end
   end

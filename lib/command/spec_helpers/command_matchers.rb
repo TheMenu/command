@@ -53,7 +53,7 @@ module Command
           if message.presence
             command.errors[key]&.include?(code: code, message: message)
           else
-            command.has_error?(key, code)
+            command.errors.exists?(key, code)
           end
         end
 
